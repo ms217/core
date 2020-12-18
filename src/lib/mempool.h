@@ -10,6 +10,11 @@
    pools to disable the warning. */
 #define MEMPOOL_GROWING "GROWING-"
 
+/* The maximum allocation size that's allowed.  Anything larger than that
+   will panic.  No pool ever should need more than 4kB of overhead per
+   allocation. */
+#define POOL_MAX_ALLOC_SIZE	(SSIZE_T_MAX - 4096)
+
 /* Memory allocated and reallocated (the new data in it) in pools is always
    zeroed, it will cost only a few CPU cycles and may well save some debug
    time. */
@@ -62,6 +67,10 @@ pool_t pool_alloconly_create(const char *name, size_t size);
    pool, and be sure that it gets cleared from the memory when it's no longer
    needed. */
 pool_t pool_alloconly_create_clean(const char *name, size_t size);
+
+/* Create new alloc pool. This is very similar to system pool, but it
+   will deallocate all memory on deinit. */
+pool_t pool_allocfree_create(const char *name);
 
 /* When allocating memory from returned pool, the data stack frame must be
    the same as it was when calling this function. pool_unref() also checks

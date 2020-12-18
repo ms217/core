@@ -16,31 +16,28 @@
 #include "auth-token.h"
 #include "auth-master-connection.h"
 #include "auth-request-handler.h"
+#include "auth-request-handler-private.h"
 #include "auth-policy.h"
 
 #define AUTH_FAILURE_DELAY_CHECK_MSECS 500
-
-struct auth_request_handler {
-	int refcount;
-	pool_t pool;
-	HASH_TABLE(void *, struct auth_request *) requests;
-
-        unsigned int connect_uid, client_pid;
-
-	auth_client_request_callback_t *callback;
-	struct auth_client_connection *conn;
-
-	auth_master_request_callback_t *master_callback;
-
-	unsigned int destroyed:1;
-	unsigned int token_auth:1;
-};
 
 static ARRAY(struct auth_request *) auth_failures_arr;
 static struct aqueue *auth_failures;
 static struct timeout *to_auth_failures;
 
 static void auth_failure_timeout(void *context) ATTR_NULL(1);
+
+static void
+auth_request_handler_default_reply_callback(struct auth_request *request,
+					    enum auth_client_result result,
+					    const void *auth_reply,
+					    size_t reply_size);
+
+static void
+auth_request_handler_default_reply_continue(struct auth_request *request,
+					    const void *reply,
+					    size_t reply_size);
+
 
 struct auth_request_handler *
 auth_request_handler_create(bool token_auth, auth_client_request_callback_t *callback,
@@ -60,6 +57,12 @@ auth_request_handler_create(bool token_auth, auth_client_request_callback_t *cal
 	handler->conn = conn;
 	handler->master_callback = master_callback;
 	handler->token_auth = token_auth;
+	handler->reply_callback =
+		auth_request_handler_default_reply_callback;
+	handler->reply_continue_callback =
+		auth_request_handler_default_reply_continue;
+	handler->verify_plain_continue_callback =
+		auth_request_default_verify_plain_continue;
 	return handler;
 }
 
@@ -342,6 +345,16 @@ void auth_request_handler_reply(struct auth_request *request,
 				enum auth_client_result result,
 				const void *auth_reply, size_t reply_size)
 {
+	struct auth_request_handler *handler = request->handler;
+	handler->reply_callback(request, result, auth_reply, reply_size);
+}
+
+static void
+auth_request_handler_default_reply_callback(struct auth_request *request,
+					    enum auth_client_result result,
+					    const void *auth_reply,
+					    size_t reply_size)
+{
         struct auth_request_handler *handler = request->handler;
 	string_t *str;
 	int ret;
@@ -393,6 +406,14 @@ void auth_request_handler_reply(struct auth_request *request,
 
 void auth_request_handler_reply_continue(struct auth_request *request,
 					 const void *reply, size_t reply_size)
+{
+	request->handler->reply_continue_callback(request, reply, reply_size);
+}
+
+static void
+auth_request_handler_default_reply_continue(struct auth_request *request,
+					    const void *reply,
+					    size_t reply_size)
 {
 	auth_request_handler_reply(request, AUTH_CLIENT_RESULT_CONTINUE,
 				   reply, reply_size);
@@ -657,6 +678,7 @@ static void auth_str_append_userdb_extra_fields(struct auth_request *request,
 		auth_str_add_keyvalue(dest, "master_user",
 				      request->master_user);
 	}
+	auth_str_add_keyvalue(dest, "auth_mech", request->mech->mech_name);
 	if (*request->set->anonymous_username != '\0' &&
 	    strcmp(request->user, request->set->anonymous_username) == 0) {
 		/* this is an anonymous login, either via ANONYMOUS

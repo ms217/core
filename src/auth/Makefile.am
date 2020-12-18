@@ -227,7 +227,8 @@ test_programs = \
 	test-auth-cache \
 	test-auth-request-var-expand \
 	test-username-filter \
-	test-db-dict
+	test-db-dict \
+	test-mech
 
 noinst_PROGRAMS = $(test_programs)
 
@@ -252,6 +253,13 @@ test_username_filter_DEPENDENCIES = $(pkglibexec_PROGRAMS) $(test_libs) $(LIBDOV
 test_db_dict_SOURCES = test-db-dict.c
 test_db_dict_LDADD = $(test_libs) libauth.la
 test_db_dict_DEPENDENCIES = $(pkglibexec_PROGRAMS) $(test_libs)
+
+test_mech_SOURCES = \
+	test-mock.c \
+	test-mech.c
+
+test_mech_LDADD = $(test_libs) $(auth_libs) $(AUTH_LIBS)
+test_mech_DEPENDENCIES = $(pkglibexec_PROGRAMS) $(test_libs)
 
 check: check-am check-test
 check-test: all-am

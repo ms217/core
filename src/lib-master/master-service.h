@@ -161,6 +161,8 @@ const char *master_service_get_version_string(struct master_service *service);
 /* Returns name of the service, as given in name parameter to _init(). */
 const char *master_service_get_name(struct master_service *service);
 
+const enum master_service_flags master_service_get_flags(struct master_service *service);
+
 /* Start the service. Blocks until finished */
 void master_service_run(struct master_service *service,
 			master_service_connection_callback_t *callback)

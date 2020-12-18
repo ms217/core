@@ -98,6 +98,7 @@ liblib_la_SOURCES = \
 	md4.c \
 	md5.c \
 	mempool.c \
+	mempool-allocfree.c \
 	mempool-alloconly.c \
 	mempool-datastack.c \
 	mempool-system.c \

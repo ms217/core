@@ -95,6 +95,7 @@ int message_snippet_generate(struct istream *input,
 			     unsigned int max_snippet_chars,
 			     string_t *snippet)
 {
+	const struct message_parser_settings parser_set = { .flags = 0 };
 	struct message_parser_ctx *parser;
 	struct message_part *parts;
 	struct message_decoder_context *decoder;
@@ -108,7 +109,7 @@ int message_snippet_generate(struct istream *input,
 	ctx.snippet = snippet;
 	ctx.chars_left = max_snippet_chars;
 
-	parser = message_parser_init(pool_datastack_create(), input, 0, 0);
+	parser = message_parser_init(pool_datastack_create(), input, &parser_set);
 	decoder = message_decoder_init(NULL, 0);
 	while ((ret = message_parser_parse_next_block(parser, &raw_block)) > 0) {
 		if (!message_decoder_decode_next_block(decoder, &raw_block, &block))

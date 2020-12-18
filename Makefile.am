@@ -53,9 +53,10 @@ if HAVE_SYSTEMD
 
 systemdsystemunit_DATA = \
         dovecot.socket \
-        dovecot.service
+        dovecot.service \
+        dovecot-init.service
 else
-EXTRA_DIST += dovecot.socket dovecot.service.in
+EXTRA_DIST += dovecot.socket dovecot.service.in dovecot-init.service
 endif
 
 install-exec-hook:

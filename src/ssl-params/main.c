@@ -103,7 +103,10 @@ static void sig_chld(const siginfo_t *si ATTR_UNUSED, void *context ATTR_UNUSED)
 	if (waitpid(-1, &status, WNOHANG) < 0)
 		i_error("waitpid() failed: %m");
 	else if (status != 0)
+	{
 		i_error("child process failed with status %d", status);
+		if(master_service_get_flags(master_service) & MASTER_SERVICE_FLAG_STANDALONE) exit(1);
+	}
 	else {
 		/* params should have been created now. try refreshing. */
 		ssl_params_refresh(param);

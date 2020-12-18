@@ -161,8 +161,7 @@ acl_backend_vfile_object_init(struct acl_backend *_backend,
 	T_BEGIN {
 		if (*name == '\0' ||
 		    mailbox_list_is_valid_name(_backend->list, name, &error)) {
-			vname = *name == '\0' ? "" :
-				mailbox_list_get_vname(_backend->list, name);
+			vname = mailbox_list_get_vname(_backend->list, name);
 
 			dir = acl_backend_vfile_get_local_dir(_backend, name, vname);
 			aclobj->local_path = dir == NULL ? NULL :

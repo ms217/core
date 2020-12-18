@@ -8,18 +8,20 @@
 Description=Dovecot IMAP/POP3 email server
 Documentation=man:dovecot(1)
 Documentation=http://wiki2.dovecot.org/
-After=local-fs.target network.target
+After=local-fs.target network-online.target dovecot-init.service
+Requires=dovecot-init.service
 
 [Service]
 Type=forking
+ExecStartPre=/usr/libexec/dovecot/prestartscript
 ExecStart=@sbindir@/dovecot
 PIDFile=@rundir@/master.pid
 ExecReload=@bindir@/doveadm reload
 ExecStop=@bindir@/doveadm stop
 PrivateTmp=true
 NonBlocking=yes
-# Enable this if your systemd is new enough to support it:
-#ProtectSystem=full
+# Enable this if your systemd is new enough to support it: (it will make /usr /boot /etc read only for dovecot)
+ProtectSystem=full
 
 # You can add environment variables with e.g.:
 #Environment='CORE_OUTOFMEM=1'

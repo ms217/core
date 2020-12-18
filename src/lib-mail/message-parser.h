@@ -17,6 +17,21 @@ enum message_parser_flags {
 	MESSAGE_PARSER_FLAG_INCLUDE_BOUNDARIES		= 0x08
 };
 
+#define MESSAGE_PARSER_DEFAULT_MAX_NESTED_MIME_PARTS 100
+#define MESSAGE_PARSER_DEFAULT_MAX_TOTAL_MIME_PARTS 10000
+
+struct message_parser_settings {
+	enum message_header_parser_flags hdr_flags;
+	enum message_parser_flags flags;
+
+	/* Maximum nested MIME parts.
+	   0 = MESSAGE_PARSER_DEFAULT_MAX_NESTED_MIME_PARTS. */
+	unsigned int max_nested_mime_parts;
+	/* Maximum MIME parts in total.
+	   0 = MESSAGE_PARSER_DEFAULT_MAX_TOTAL_MIME_PARTS. */
+	unsigned int max_total_mime_parts;
+};
+
 struct message_parser_ctx;
 
 struct message_block {
@@ -45,14 +60,12 @@ extern message_part_header_callback_t *null_message_part_header_callback;
    are allocated from. */
 struct message_parser_ctx *
 message_parser_init(pool_t part_pool, struct istream *input,
-		    enum message_header_parser_flags hdr_flags,
-		    enum message_parser_flags flags);
+		    const struct message_parser_settings *set);
 /* Use preparsed parts to speed up parsing. */
 struct message_parser_ctx *
 message_parser_init_from_parts(struct message_part *parts,
 			       struct istream *input,
-			       enum message_header_parser_flags hdr_flags,
-			       enum message_parser_flags flags);
+			       const struct message_parser_settings *set);
 /* Returns 0 if parts were returned, -1 we used preparsed parts and they
    didn't match the current message */
 int message_parser_deinit(struct message_parser_ctx **ctx,

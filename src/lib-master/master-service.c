@@ -712,6 +712,11 @@ const char *master_service_get_name(struct master_service *service)
 	return service->name;
 }
 
+const enum master_service_flags master_service_get_flags(struct master_service *service)
+{
+	return service->flags;
+}
+
 void master_service_run(struct master_service *service,
 			master_service_connection_callback_t *callback)
 {

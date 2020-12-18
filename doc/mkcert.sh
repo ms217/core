@@ -5,8 +5,8 @@
 
 umask 077
 OPENSSL=${OPENSSL-openssl}
-SSLDIR=${SSLDIR-/etc/ssl}
-OPENSSLCONFIG=${OPENSSLCONFIG-dovecot-openssl.cnf}
+SSLDIR=${SSLDIR-/etc/pki/dovecot}
+OPENSSLCONFIG=${OPENSSLCONFIG-/etc/pki/dovecot/dovecot-openssl.cnf}
 
 CERTDIR=$SSLDIR/certs
 KEYDIR=$SSLDIR/private
@@ -35,6 +35,7 @@ if [ -f $KEYFILE ]; then
 fi
 
 $OPENSSL req -new -x509 -nodes -config $OPENSSLCONFIG -out $CERTFILE -keyout $KEYFILE -days 365 || exit 2
-chmod 0600 $KEYFILE
+chown root:root $CERTFILE $KEYFILE
+chmod 0600 $CERTFILE $KEYFILE
 echo 
 $OPENSSL x509 -subject -fingerprint -noout -in $CERTFILE || exit 2

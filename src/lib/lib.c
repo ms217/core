@@ -175,7 +175,7 @@ void lib_init(void)
 	hostpid_init();
 	lib_open_non_stdio_dev_null();
 	var_expand_extensions_init();
-
+	random_init();
 	lib_initialized = TRUE;
 }
 
